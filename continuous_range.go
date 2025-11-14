@@ -71,7 +71,11 @@ func (r ContinuousRange) String() string {
 // Translate maps a given value into the ContinuousRange space.
 func (r ContinuousRange) Translate(value float64) int {
 	normalized := value - r.Min
-	ratio := normalized / r.GetDelta()
+	delta := r.GetDelta()
+	var ratio float64 = 1
+	if delta != 0 {
+		ratio = normalized / delta
+	}
 
 	if r.IsDescending() {
 		return r.Domain - int(math.Ceil(ratio*float64(r.Domain)))

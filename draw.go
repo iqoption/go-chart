@@ -22,7 +22,7 @@ func (d draw) LineSeries(r Renderer, canvasBox Box, xrange, yrange Range, style 
 
 	v0x, v0y := vs.GetValues(0)
 	x0 := cl + xrange.Translate(v0x)
-	y0 := cb - yrange.Translate(v0y)
+	y0 := d.CalcYForContinuousSeries(canvasBox, yrange, v0y)
 
 	yv0 := yrange.Translate(0)
 
@@ -35,7 +35,7 @@ func (d draw) LineSeries(r Renderer, canvasBox Box, xrange, yrange Range, style 
 		for i := 1; i < vs.Len(); i++ {
 			vx, vy = vs.GetValues(i)
 			x = cl + xrange.Translate(vx)
-			y = cb - yrange.Translate(vy)
+			y = d.CalcYForContinuousSeries(canvasBox, yrange, vy)
 			r.LineTo(x, y)
 		}
 		r.LineTo(x, MinInt(cb, cb-yv0))
@@ -51,7 +51,7 @@ func (d draw) LineSeries(r Renderer, canvasBox Box, xrange, yrange Range, style 
 		for i := 1; i < vs.Len(); i++ {
 			vx, vy = vs.GetValues(i)
 			x = cl + xrange.Translate(vx)
-			y = cb - yrange.Translate(vy)
+			y = d.CalcYForContinuousSeries(canvasBox, yrange, vy)
 			r.LineTo(x, y)
 		}
 		r.Stroke()
@@ -64,7 +64,7 @@ func (d draw) LineSeries(r Renderer, canvasBox Box, xrange, yrange Range, style 
 		for i := 0; i < vs.Len(); i++ {
 			vx, vy = vs.GetValues(i)
 			x = cl + xrange.Translate(vx)
-			y = cb - yrange.Translate(vy)
+			y = d.CalcYForContinuousSeries(canvasBox, yrange, vy)
 
 			dotWidth := defaultDotWidth
 			if style.DotWidthProvider != nil {
@@ -82,6 +82,14 @@ func (d draw) LineSeries(r Renderer, canvasBox Box, xrange, yrange Range, style 
 			r.FillStroke()
 		}
 	}
+}
+
+func (d draw) CalcYForContinuousSeries(box Box, yrange Range, value float64) int {
+	var delta = yrange.GetDelta()
+	if delta == 0 {
+		return (box.Top + box.Bottom) / 2
+	}
+	return box.Bottom - yrange.Translate(value)
 }
 
 // BoundedSeries draws a series that implements BoundedValuesProvider.
